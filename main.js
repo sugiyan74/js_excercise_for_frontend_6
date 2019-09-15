@@ -2,14 +2,15 @@
 (() => {
   // - 入力したTodoタスクの一覧を保持する配列を定義する
   //   - 変数名は `todos` とする
-
+  const todos = [];
 
   // - HTMLのID値を使って以下のDOM要素を取得する
   //   - テキストボックス(input[type="text"])
   //   - 追加ボタン(button要素)
   //   - Todoリストを一覧表示するul要素
-
-
+  const inputText = document.getElementById('input-todo-box');
+  const addButton = document.getElementById('add-button');
+  const todoList = document.getElementById('todo-list');
 
   // `pickupTodoFromTextBox関数` を実装する
   // - 実現したい機能
@@ -19,7 +20,11 @@
   //   - 無し
   // - 戻り値
   //   - `input[type="text"]`から取得した文字列を返す
-
+  function pickupTodoFromTextBox() {
+    const inputTextValue = inputText.value;
+    inputText.value = '';
+    return inputTextValue;
+  }
 
   // `validateTodo関数` を実装する
   // - 実現したい機能
@@ -29,7 +34,17 @@
   //   - todo : 文字列を受け取る。
   // - 戻り値
   //   - 引数で受け取ったtodoをそのまま返す
-
+  function validateTodo(todo) {
+    if(!todo) {
+      throw new Error('何も入力されていません');
+    }
+    todos.forEach((originaltodo) => {
+      if(originaltodo === todo) {
+        throw new Error('同じ名前のタスクは既に作成されています');
+      }
+    });
+    return todo;
+  }
 
   // `addTodo関数` を実装する
   // - 実現したい機能
@@ -38,7 +53,9 @@
   //   - todo
   // - 戻り値
   //   - 無し
-
+  function addTodo(todo) {
+    todos.push(todo);
+  }
 
   // `showTodos関数` を実装する
   // - 実現したい機能
@@ -50,6 +67,24 @@
   //   - 無し
   // - 戻り値
   //   - 無し
+  function showTodos() {
+    while(todoList.firstChild) {
+      todoList.removeChild(todoList.firstChild);
+    }
+
+    todos.forEach((todo, index) => {
+      const liElement = document.createElement('li');
+      const deleteButton = document.createElement('button');
+      liElement.innerText = todo;
+      deleteButton.innerText = '削除';
+      todoList.appendChild(liElement);
+      liElement.appendChild(deleteButton);
+
+      deleteButton.addEventListener('click', () => {
+        promiseTaskOfDeletingTodo(index);
+      });
+    });
+  }
 
 
   // `deleteTodo関数` を実装する
@@ -57,7 +92,9 @@
   //   - 配列todosから対応するtodo情報を削除する
   // - 引数
   //   - index : 配列から削除したい要素のインデックス番号
-
+  function deleteTodo(index) {
+    todos.splice(index, 1);
+  }
 
   // `promiseTaskOfAddingTodo関数を実装する`
   // - 実現したい機能
@@ -74,7 +111,25 @@
   //   - 無し
   // - 戻り値
   //   - 無し
-
+  function promiseTaskOfAddingTodo() {
+    const promiseAddingTodo = Promise.resolve();
+    promiseAddingTodo
+      .then(() => {
+        return pickupTodoFromTextBox();
+      })
+      .then((todo) => {
+        return validateTodo(todo);
+      })
+      .then((todo) => {
+        addTodo(todo);
+      })
+      .then(() => {
+        showTodos();
+      })
+      .catch((error) => {
+        alert(error);
+      });
+  }
 
   // `promiseTaskOfDeletingTodo関数を実装する`
   // - 実現したい機能
@@ -88,8 +143,20 @@
   //   - index : 配列から削除したい要素のインデックス番号
   // - 戻り値
   //   - 無し
-
+  function promiseTaskOfDeletingTodo(index) {
+    const promiseDeletingTodo = Promise.resolve(index);
+    promiseDeletingTodo
+      .then((index) => {
+        deleteTodo(index);
+      })
+      .then(() => {
+        showTodos();
+      });
+  }
 
   // 追加ボタンをクリックしたら `promiseTaskOfAddingTodo` を実行する
+  addButton.addEventListener('click', () => {
+    promiseTaskOfAddingTodo();
+  });
 
 })();
