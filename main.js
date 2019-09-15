@@ -11,8 +11,6 @@
   const inputText = document.getElementById('input-todo-box');
   const addButton = document.getElementById('add-button');
   const todoList = document.getElementById('todo-list');
-  
-
 
   // `pickupTodoFromTextBox関数` を実装する
   // - 実現したい機能
@@ -37,12 +35,12 @@
   // - 戻り値
   //   - 引数で受け取ったtodoをそのまま返す
   function validateTodo(todo) {
-    if(todo === '') {
-      throw('何も入力されていません');
+    if(!todo) {
+      throw new Error('何も入力されていません');
     }
     todos.forEach((originaltodo) => {
       if(originaltodo === todo) {
-        throw('同じ名前のタスクは既に作成されています');
+        throw new Error('同じ名前のタスクは既に作成されています');
       }
     });
     return todo;
@@ -74,7 +72,7 @@
       todoList.removeChild(todoList.firstChild);
     }
 
-    todos.forEach((todo) => {
+    todos.forEach((todo, index) => {
       const liElement = document.createElement('li');
       const deleteButton = document.createElement('button');
       liElement.innerText = todo;
@@ -83,7 +81,8 @@
       liElement.appendChild(deleteButton);
 
       deleteButton.addEventListener('click', () => {
-        promiseTaskOfDeletingTodo();
+        console.log(index);
+        promiseTaskOfDeletingTodo(index);
       });
     });
   }
@@ -130,7 +129,7 @@
       })
       .catch((error) => {
         alert(error);
-      })
+      });
   }
 
   // `promiseTaskOfDeletingTodo関数を実装する`
@@ -145,15 +144,15 @@
   //   - index : 配列から削除したい要素のインデックス番号
   // - 戻り値
   //   - 無し
-  function promiseTaskOfDeletingTodo() {
-    const promiseDeletingTodo = Promise.resolve();
+  function promiseTaskOfDeletingTodo(index) {
+    const promiseDeletingTodo = Promise.resolve(index);
     promiseDeletingTodo
-    .then(() => {
-      deleteTodo();
-    })
-    .then(() => {
-      showTodos();
-    })
+      .then((index) => {
+        deleteTodo(index);
+      })
+      .then(() => {
+        showTodos();
+      });
   }
 
   // 追加ボタンをクリックしたら `promiseTaskOfAddingTodo` を実行する
