@@ -81,7 +81,6 @@
       liElement.appendChild(deleteButton);
 
       deleteButton.addEventListener('click', () => {
-        console.log(index);
         promiseTaskOfDeletingTodo(index);
       });
     });
